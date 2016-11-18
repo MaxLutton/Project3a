@@ -77,7 +77,7 @@ void superblock(char* file)
 	pread(fd, &fpg, 4, 1024+36);
 	unsigned int fdb;
 	pread(fd, &fdb, 4, 1024+20);
-	fprintf(csv,"%02X,%d,%d,%d,%d,%d,%d,%d,%d\n", magic, inodes, blocks, bsize, fsize, bpg, ipg, fpg, fdb); 
+	fprintf(csv,"%x,%d,%d,%d,%d,%d,%d,%d,%d\n", magic, inodes, blocks, bsize, fsize, bpg, ipg, fpg, fdb); 
 }
 
 void group(char* file)
@@ -102,6 +102,6 @@ void group(char* file)
 	    pread(fd, &iBit, 4, 1024 + blockSize + 32*i + 4);
 	    pread(fd, &bBit, 4, 1024 + blockSize + 32*i);
 	    pread(fd, &inodeTable, 4, 1024 + blockSize + 32*i + 8);
-	    fprintf(csv, "%d, %d, %d, %d, %04X, %04X, %04X\n", bpg, freeBs, freeIs, directories, iBit, bBit, inodeTable);
+	    fprintf(csv, "%d,%d,%d,%d,%x,%x,%x\n", bpg, freeBs, freeIs, directories, iBit, bBit, inodeTable);
 	  }/*TODO PUT IN CHECKS*/
 }
