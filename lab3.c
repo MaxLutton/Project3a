@@ -10,6 +10,8 @@ void superblock(char* file);
 
 void group(char* file);
 
+void bitmap(char* file);
+
 int main(int argc, char* argv[])
 {
 	if (argc < 1)//no file
@@ -26,6 +28,8 @@ int main(int argc, char* argv[])
 	superblock(imageName);
 	/*------GROUP DESCRIPTORS--*/
 	group(imageName);
+	/*------BITMAP-------------*/
+	bitmap(imageName);
 
 }
 
@@ -105,3 +109,43 @@ void group(char* file)
 	    fprintf(csv, "%d,%d,%d,%d,%x,%x,%x\n", bpg, freeBs, freeIs, directories, iBit, bBit, inodeTable);
 	  }/*TODO PUT IN CHECKS*/
 }
+
+void bitmap(char* file)
+{
+  FILE* fil = fopen(file,"r");
+  int fd = fileno(fil);
+  FILE* csv = fopen("bitmap.csv", "w+"); //truncate or create file
+  unsigned int bpg, blockSize, blocks;
+  pread(fd, &bpg, 4, 1024+32);
+  pread(fd, &blockSize, 4, 1024+24);
+  pread(fd, &blocks, 4, 1024+4);
+  blockSize = 1024 << blockSize;
+  unsigned int groups = blocks/bpg;
+  int bMap, iMap;
+  unsigned int currentBlock;
+  int i, j;
+  //iterate for each block group
+  for (i = 0; i < groups; i++)
+    {
+      pread(fd, &bMap, 4, 1024 + blockSize + 32*i);//block bitmap block number by reading from group descriptors
+      pread(fd, &iMap, 4, 1024 + blockSize + 32*i + 4);//inode bitmap block number
+      
+      //for each bit in this group's bitmaps
+      for (j = 0; j < bpg; j++)
+	{
+	  int byte_offset = j / 8;
+	  int bit_offset = j % 8;
+	  unsigned char byte;
+	  unsigned char mask = (1 << bit_offset);
+	  pread(fd, &byte, 1, blockSize*bMap+ byte_offset);//read from block bitmap
+	  if ( !(byte & mask) )
+	    fprintf(csv, "%x,%d\n", bMap, j);
+	  pread(fd, &byte, 1, blockSize*iMap + byte_offset);//read from inode bitmap
+	  if ( !(byte & mask) )
+	    fprintf(csv, "%x,%d\n", iMap, j);
+	}
+    }
+}
+	  
+	
+  
