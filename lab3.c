@@ -19,7 +19,7 @@ struct inode
 {
  __u16 i_mode;
  __u16 i_uid;
- __u32 i_size;
+ __s32 i_size;
  __u32 i_atime;
  __u32 i_ctime;
  __u32 i_mtime;
@@ -235,7 +235,7 @@ void inode(int fd, int number, int group, int offset)
   fprintf(inodeF, "%d,%c,%o,%d,%d,%d,%x,%x,%x,%d,%d,", number+1,
 	 fileType, myNode.i_mode,myNode.i_uid, myNode.i_gid,
 	 myNode.i_links_count,myNode.i_ctime, myNode.i_mtime,
-	 myNode.i_atime, myNode.i_size, myNode.i_blocks);
+	 myNode.i_atime, myNode.i_size, myNode.i_blocks/2);
   for (k = 0; k < 14; k++)
     fprintf(inodeF, "%x,", myNode.i_block[k]);
   fprintf(inodeF, "%x\n", myNode.i_block[14]);
